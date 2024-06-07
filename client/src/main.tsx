@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { XorO } from "./types";
+import { getPlayerData, updatePlayerScore } from "./serverFunctions";
 
 export const Main = () => {
   const [board, setBoard] = useState<(XorO | undefined)[][]>([
@@ -14,7 +15,7 @@ export const Main = () => {
   const [gridSize, setGridSize] = useState<number>(3);
   const [numGoes, setNumGoes] = useState<number>(0);
 
-  const handleGo = (rowIndex: number, columnIndex: number) => {
+  const handleGo = async (rowIndex: number, columnIndex: number) => {
     if (board[rowIndex][columnIndex] === undefined) {
       let newBoard = [...board];
       newBoard[rowIndex][columnIndex] = turn;
@@ -37,14 +38,22 @@ export const Main = () => {
     console.log(newBoard);
   };
 
-  const handleXWins = () => {
+  const handleXWins = async () => {
     setXWins(xWins + 1);
     setWinner("X");
+    await Promise.all([
+      updatePlayerScore({ player: "X", win: true }),
+      updatePlayerScore({ player: "O", loss: true }),
+    ]);
   };
 
-  const handleOWins = () => {
+  const handleOWins = async () => {
     setOWins(oWins + 1);
     setWinner("O");
+    await Promise.all([
+      updatePlayerScore({ player: "O", win: true }),
+      updatePlayerScore({ player: "X", loss: true }),
+    ]);
   };
 
   const startNewGame = () => {
@@ -87,6 +96,13 @@ export const Main = () => {
     }
   };
 
+  const updateDrawData = async () => {
+    await Promise.all([
+      updatePlayerScore({ player: "O", draw: true }),
+      updatePlayerScore({ player: "X", draw: true }),
+    ]);
+  };
+
   useEffect(() => {
     // should only check for a win when enough moves have been made
     const minGoes = 2 * gridSize - 1;
@@ -96,8 +112,19 @@ export const Main = () => {
     // should only check for a draw when all moves have been made
     if (numGoes === gridSize * gridSize && winner === undefined) {
       setWinner("Draw");
+      updateDrawData();
     }
   }, [board]);
+
+  const getInitialScores = async () => {
+    const xData = await getPlayerData("X");
+    const oData = await getPlayerData("O");
+    setXWins(xData.wins);
+    setOWins(oData.wins);
+  };
+  useEffect(() => {
+    getInitialScores();
+  }, []);
 
   return (
     <div className="flex flex-col mt-10 items-center gap-10">
