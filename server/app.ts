@@ -105,7 +105,7 @@ app.post("/data/:player", (req, res) => {
               console.error("Error updating data", err);
               res.status(500).send("Error updating data");
             } else {
-              res.send("Updated wins");
+              res.send(`{"status" : "success", "message" : "Updated wins"}`);
             }
           }
         );
@@ -118,7 +118,7 @@ app.post("/data/:player", (req, res) => {
               console.error("Error updating data", err);
               res.status(500).send("Error updating data");
             } else {
-              res.send("Updated losses");
+              res.send(`{"status" : "success", "message" : "Updated losses"}`);
             }
           }
         );
@@ -131,7 +131,7 @@ app.post("/data/:player", (req, res) => {
               console.error("Error updating data", err);
               res.status(500).send("Error updating data");
             } else {
-              res.send("Updated draws");
+              res.send(`{"status" : "success", "message" : "Updated draws"}`);
             }
           }
         );
